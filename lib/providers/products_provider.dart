@@ -29,7 +29,7 @@ class Products with ChangeNotifier {
     ),
     Product(
       id: 'p4',
-      title: 'A Pan',
+      title: 'Pan',
       description: 'Prepare any meal you want.',
       price: 49.99,
       imageUrl:
@@ -38,11 +38,25 @@ class Products with ChangeNotifier {
   ];
 
   List<Product> get items {
-    return [..._items];
+    return _items;
   }
+
+  // void showFavouritesOnly() {
+  //   _showFavouritesOnly = true;
+  //   notifyListeners();
+  // }
+
+  // void showAll() {
+  //   _showFavouritesOnly = false;
+  //   notifyListeners();
+  // }
 
   Product findById(String id) {
     return _items.firstWhere((product) => product.id == id);
+  }
+
+  List<Product> get favItems {
+    return _items.where((element) => element.isFavourite).toList();
   }
 
   void addProduct() {
