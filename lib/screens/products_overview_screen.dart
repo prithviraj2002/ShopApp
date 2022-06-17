@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/products_provider.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/shop_app_drawer.dart';
 
@@ -18,6 +19,29 @@ class productOverViewScreen extends StatefulWidget {
 
 class _productOverViewScreenState extends State<productOverViewScreen> {
   var _showFavouritesOnly = false;
+  var isInit = true;
+  var isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (isInit) {
+      setState(() {
+        isLoading = true;
+      });
+      Provider.of<Products>(context).fetchProducts().then((_) {
+        setState(() {
+          isLoading = false;
+        });
+      });
+    }
+    isInit = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,27 +62,29 @@ class _productOverViewScreenState extends State<productOverViewScreen> {
             icon: Icon(Icons.more_vert),
             itemBuilder: (_) => [
               const PopupMenuItem(
-                  child: Text('Only favourites'),
-                  value: FilterOptions.Favourites),
+                  value: FilterOptions.Favourites,
+                  child: Text('Only favourites')),
               const PopupMenuItem(
-                  child: Text('Show all'), value: FilterOptions.All),
+                  value: FilterOptions.All, child: Text('Show all')),
             ],
           ),
           Consumer<Cart>(
             builder: (ctx, cartData, _) => Badge(
+              value: cartData.itemCount.toString(),
               child: IconButton(
-                icon: Icon(Icons.shopping_cart),
+                icon: const Icon(Icons.shopping_cart),
                 onPressed: () {
                   Navigator.pushNamed(context, CartScreen.routeName);
                 },
               ),
-              value: cartData.itemCount.toString(),
             ),
           )
         ],
       ),
       drawer: const ShopAppDrawer(),
-      body: ProductGrid(_showFavouritesOnly),
+      body: isLoading? const Center(
+        child: CircularProgressIndicator(),
+      ): ProductGrid(_showFavouritesOnly),
     );
   }
 }
